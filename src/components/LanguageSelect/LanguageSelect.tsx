@@ -1,0 +1,69 @@
+import { useTranslation } from 'react-i18next';
+import classes from './LanguagePicker.module.css';
+import { Select } from '@mantine/core';
+
+const langs = [
+  { value: 'uz', label: 'UZ' },
+  { value: 'ru', label: 'RU' },
+  { value: 'en', label: 'EN' },
+];
+
+type Props = {
+  variant?: 'login' | 'header';
+};
+
+export default function LanguageSelect({ variant = 'header' }: Props) {
+  const { i18n } = useTranslation();
+
+  const changeLang = (lng: string) => {
+    i18n.changeLanguage(lng);
+    localStorage.setItem('lang', lng);
+  };
+
+  if (variant === 'login') {
+    return (
+      <div className={classes.wrapper}>
+        {langs.map((l) => (
+          <button
+            key={l.value}
+            onClick={() => changeLang(l.value)}
+            className={`${classes.btn} ${i18n.language === l.value ? classes.active : ''}`}
+          >
+            {l.label}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <Select
+      value={i18n.language}
+      onChange={(v) => v && changeLang(v)}
+      data={langs}
+      rightSection={null}
+      checkIconPosition="right"
+      size="sm"
+      radius="md"
+      styles={{
+        input: {
+          background: '#F3F3F3',
+          color: '#7A7473',
+          border: 'none',
+          fontFamily: 'noto-b',
+          height: 50,
+          width: 50,
+          textAlign: 'center',
+          fontSize: 18,
+        },
+        dropdown: {
+          borderRadius: 12,
+          fontSize: 18,
+        },
+      }}
+      classNames={{
+        option: 'lang-option',
+      }}
+    />
+  );
+}

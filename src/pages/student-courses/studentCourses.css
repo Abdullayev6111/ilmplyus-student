@@ -1,0 +1,229 @@
+.sc-page {
+  width: 100%;
+  padding: 30px 0;
+}
+
+.sc-loading {
+  text-align: center;
+  padding: 60px;
+  color: #888;
+  font-size: 16px;
+}
+
+/* ===== TOP STATS ===== */
+.sc-top-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.sc-stat-card {
+  flex: 1;
+  min-width: 120px;
+  background: white;
+  border-radius: 14px;
+  border: 1.5px solid #e2eaf4;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.sc-stat-num {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a202c;
+  line-height: 1;
+}
+
+.sc-stat-lbl {
+  font-size: 12px;
+  color: #888;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.sc-stat-active .sc-stat-num { color: #1bb200; }
+.sc-stat-done   .sc-stat-num { color: #aaa; }
+
+/* ===== EMPTY ===== */
+.sc-empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: #aaa;
+}
+
+.sc-empty-icon { font-size: 48px; margin-bottom: 16px; }
+
+.sc-empty p { font-size: 16px; }
+
+/* ===== SECTION ===== */
+.sc-section { margin-bottom: 32px; }
+
+.sc-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 16px;
+}
+
+.sc-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sc-dot-active { background: #1bb200; }
+.sc-dot-done   { background: #aaa; }
+
+/* ===== GRID ===== */
+.sc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+/* ===== CARD ===== */
+.sc-card {
+  background: white;
+  border-radius: 16px;
+  border: 1.5px solid #e2eaf4;
+  box-shadow: 0 2px 12px rgba(63,136,201,0.07);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+
+.sc-card:hover {
+  box-shadow: 0 6px 24px rgba(63,136,201,0.14);
+  transform: translateY(-2px);
+}
+
+.sc-card-done {
+  border-color: #e0e0e0;
+  background: #fafafa;
+}
+
+.sc-card-done:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.07);
+  transform: translateY(-1px);
+}
+
+/* ===== CARD HEADER ===== */
+.sc-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.sc-card-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #003366;
+  flex: 1;
+}
+
+.sc-card-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.badge-active {
+  background: #f0fff0;
+  color: #1bb200;
+  border: 1px solid #1bb200;
+}
+
+.badge-done {
+  background: #f5f5f5;
+  color: #aaa;
+  border: 1px solid #ddd;
+}
+
+/* ===== CARD GRID ===== */
+.sc-card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.sc-card-item {
+  background: #fff8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.sc-card-done .sc-card-item { background: #f5f5f5; }
+
+.sc-card-item-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+.sc-card-item > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sc-card-item-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sc-card-item-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+/* ===== ATTEND BUTTON ===== */
+.sc-attend-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #fe9100;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.sc-attend-btn:hover {
+  background: #e07d00;
+  transform: scale(1.01);
+}
+
+.sc-card-done .sc-attend-btn {
+  background: #ccc;
+}
+
+.sc-card-done .sc-attend-btn:hover {
+  background: #bbb;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .sc-grid { grid-template-columns: 1fr; }
+  .sc-card-grid { grid-template-columns: 1fr 1fr; }
+  .sc-top-stats { gap: 10px; }
+  .sc-stat-card { padding: 14px; }
+}

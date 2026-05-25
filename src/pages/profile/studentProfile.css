@@ -1,0 +1,277 @@
+.sp-page {
+  width: 100%;
+  margin-top: 50px !important;
+  margin-left: 140px !important;
+}
+
+/* Header card: photo + info */
+.sp-header-card {
+  display: flex;
+  gap: 32px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  padding: 28px;
+  margin-bottom: 0;
+}
+
+/* Photo */
+.sp-photo-wrap {
+  width: 160px;
+  min-width: 160px;
+  height: 190px;
+  border-radius: 10px;
+  border: 2px dashed #d0d0d0;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.sp-photo-wrap:hover {
+  border-color: #228be6;
+}
+
+.sp-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sp-photo-plus {
+  font-size: 36px;
+  color: #bbb;
+  line-height: 1;
+  user-select: none;
+}
+
+/* Info */
+.sp-info-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sp-info-section-label {
+  font-family: noto-b, sans-serif;
+  font-size: 14px;
+  color: #fe9100;
+}
+
+.sp-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 20px;
+}
+
+.sp-info-col-full {
+  grid-column: 1 / -1;
+}
+
+.sp-info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sp-info-key {
+  font-size: 10px;
+  color: #888;
+  font-family: noto-r, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.sp-info-val {
+  font-size: 13px;
+  font-family: noto-m, sans-serif;
+  color: #333;
+}
+
+.sp-info-val-blue {
+  color: #228be6;
+}
+
+/* Status / Balance badges */
+.sp-badges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.sp-badge-balance {
+  background: #fe9100;
+  color: #fff;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-family: noto-b, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.2px;
+}
+
+.sp-badge-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-family: noto-b, sans-serif;
+  font-size: 12px;
+  background: #003366;
+  color: #fff;
+}
+
+.sp-badge-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1bb200;
+  display: inline-block;
+}
+
+/* Tabs */
+.sp-tabs-bar {
+  display: flex;
+  background: #fff;
+  border-bottom: 2px solid #e5e5e5;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+
+.sp-tab-btn {
+  padding: 14px 18px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: noto-m, sans-serif;
+  font-size: 13px;
+  color: #666;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.sp-tab-btn:hover {
+  color: #003366;
+}
+
+.sp-tab-btn.active {
+  color: #003366;
+  border-bottom-color: #003366;
+  font-family: noto-b, sans-serif;
+}
+
+/* Tab content */
+.sp-tab-content {
+  background: #fff;
+  padding: 24px 28px;
+  min-height: 180px;
+}
+
+.sp-tab-section-title {
+  font-family: noto-b, sans-serif;
+  font-size: 14px;
+  color: #fe9100;
+  margin-bottom: 18px;
+}
+
+.sp-tab-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px 24px;
+}
+
+.sp-tab-info-full {
+  grid-column: 1 / -1;
+}
+
+.sp-tab-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  color: #bbb;
+  font-family: noto-r, sans-serif;
+  font-size: 14px;
+}
+
+/* Camera modal */
+.sp-camera-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+.sp-camera-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 90%;
+  max-width: 440px;
+}
+
+.sp-camera-heading {
+  font-family: noto-b, sans-serif;
+  font-size: 17px;
+  color: #003366;
+}
+
+.sp-camera-video {
+  width: 100%;
+  border-radius: 10px;
+  background: #000;
+  max-height: 300px;
+}
+
+.sp-camera-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.sp-camera-snap {
+  flex: 1;
+  padding: 11px;
+  border: none;
+  border-radius: 8px;
+  background: #228be6;
+  color: #fff;
+  font-family: noto-m, sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.sp-camera-snap:hover {
+  background: #1c7ed6;
+}
+
+.sp-camera-cancel {
+  flex: 1;
+  padding: 11px;
+  border: none;
+  border-radius: 8px;
+  background: #f0f0f0;
+  color: #333;
+  font-family: noto-m, sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+canvas.sp-hidden {
+  display: none;
+}
