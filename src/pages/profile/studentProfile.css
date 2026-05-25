@@ -236,6 +236,7 @@
   border-radius: 10px;
   background: #000;
   max-height: 300px;
+  transform: scaleX(-1);
 }
 
 .sp-camera-actions {

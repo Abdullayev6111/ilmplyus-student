@@ -308,4 +308,12 @@ const ProfilePage = () => {
               <button className="sp-camera-cancel" onClick={closeCamera}>
                 Bekor qilish
               </button>
-   
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ProfilePage;
