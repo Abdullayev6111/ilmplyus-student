@@ -50,15 +50,22 @@ const StudentExamPage = () => {
 
   const startMutation = useMutation({
     mutationFn: (payload: { student_id: number }) =>
-      API.post<StartAttemptResponse>(`/exam-sessions/${sessionId}/start`, payload).then(
-        (r) => r.data,
-      ),
+      API.post<StartAttemptResponse>(`/exam-sessions/${sessionId}/start`, payload, {
+        skipGlobalNotification: true,
+      }).then((r) => r.data),
     onSuccess: (data) => {
+      if (data.status === 'submitted' || data.status === 'timed_out') {
+        setErrorMsg(t('student.exam.alreadyDone'));
+        setView('error');
+        return;
+      }
       setAttemptId(data.attempt_id);
       setRemainingSeconds(data.remaining_seconds);
     },
-    onError: () => {
-      setErrorMsg(t('student.exam.startError'));
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { message?: string } } };
+      const backendMsg = err?.response?.data?.message;
+      setErrorMsg(backendMsg || t('student.exam.startError'));
       setView('error');
     },
   });
@@ -73,7 +80,19 @@ const StudentExamPage = () => {
 
   const answerMutation = useMutation({
     mutationFn: (payload: ExamAnswerPayload) =>
-      API.post(`/exam-attempts/${attemptId}/answer`, payload),
+      API.post(`/exam-attempts/${attemptId}/answer`, payload, {
+        skipGlobalNotification: true,
+      }),
+    onError: (error: unknown) => {
+      const err = error as { response?: { status?: number } };
+      if (err?.response?.status === 422) {
+        clearTimer();
+        if (!autoSubmittedRef.current) {
+          autoSubmittedRef.current = true;
+          submitMutationRef.current.mutate();
+        }
+      }
+    },
   });
 
   const submitMutation = useMutation({
@@ -108,6 +127,7 @@ const StudentExamPage = () => {
                 status: 'submitted',
                 percentage: data.percentage,
                 correct_count: data.correct_count,
+                incorrect_count: data.incorrect_count,
                 total_questions: data.total_questions,
                 is_passed: data.is_passed,
               }
@@ -117,6 +137,9 @@ const StudentExamPage = () => {
       });
       queryClient.invalidateQueries({ queryKey: ['student-exam-sessions'] });
       queryClient.invalidateQueries({ queryKey: ['exam-session-detail', Number(sessionId)] });
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: ['exam-attempt', attemptId] });
     },
   });
 

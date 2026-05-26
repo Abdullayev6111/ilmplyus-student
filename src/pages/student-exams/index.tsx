@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueries } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { API } from '../../api/api';
@@ -38,6 +38,7 @@ interface SessionAttempt {
   status: string;
   percentage?: number | string | null;
   correct_count?: number | null;
+  incorrect_count?: number | null;
   total_questions?: number | null;
   is_passed?: boolean | null;
 }
@@ -59,53 +60,10 @@ const formatDateTime = (date?: string, time?: string) => {
   return time ? `${d} ${time.slice(0, 5)}` : d;
 };
 
-const isDone = (s: ExamSession) =>
-  s.my_attempt_status === 'submitted' || s.my_attempt_status === 'timed_out';
-
-/* Topshirilgan har bir sessiya uchun alohida fetch */
-const SubmittedSessionRow = ({ session }: { session: ExamSession }) => {
-  const { t } = useTranslation();
-  const user = useAuthStore((state) => state.user);
-
-  const { data: detail } = useQuery({
-    queryKey: ['exam-session-detail', session.id],
-    queryFn: () =>
-      API.get(`/exam-sessions/${session.id}`).then((r) => r.data),
-    staleTime: 5 * 60 * 1000,
-    enabled: !!session.id,
-  });
-
-  const attempts: SessionAttempt[] = detail?.attempts ?? [];
-  const myAttempt = attempts.find((a) => a.student_id === user?.id);
-
-  const pct =
-    myAttempt?.percentage != null ? Number(myAttempt.percentage).toFixed(1) : null;
-  const correct = myAttempt?.correct_count;
-  const total = myAttempt?.total_questions ?? session.test?.questions_count;
-  const passed = myAttempt?.is_passed;
-
-  return (
-    <tr>
-      <td>{session.test?.name || '-'}</td>
-      <td>{session.group?.name || '-'}</td>
-      <td>{pct != null ? `${pct}%` : '—'}</td>
-      <td>{correct != null && total != null ? `${total}/${correct}` : '—'}</td>
-      <td>
-        {passed != null ? (
-          <span className={`sep-badge ${passed ? 'sep-badge-pass' : 'sep-badge-fail'}`}>
-            {passed ? t('student.exams.passed') : t('student.exams.failed')}
-          </span>
-        ) : (
-          <span className="sep-badge sep-badge-submitted">{t('student.exams.submittedBadge')}</span>
-        )}
-      </td>
-    </tr>
-  );
-};
-
 const StudentExamsPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
 
   const { data: sessionsRaw } = useQuery({
     queryKey: ['student-exam-sessions'],
@@ -113,9 +71,41 @@ const StudentExamsPage = () => {
   });
 
   const sessions = toArray<ExamSession>(sessionsRaw);
-  console.log('RAW sessions:', sessionsRaw);
-  const submittedSessions = sessions.filter((s) => isDone(s));
-  const totalActive = sessions.filter((s) => !isDone(s)).length;
+
+  // Fetch session detail for each session to get accurate attempt status.
+  // GET /exam-sessions/{id} returns attempts[].status which is authoritative —
+  // the list endpoint's my_attempt_status reflects the session status, not the
+  // student's attempt status, causing submitted attempts to appear as in_progress.
+  const detailQueries = useQueries({
+    queries: sessions.map((s) => ({
+      queryKey: ['exam-session-detail', s.id],
+      queryFn: () => API.get(`/exam-sessions/${s.id}`).then((r) => r.data),
+      staleTime: 5 * 60 * 1000,
+      enabled: !!s.id,
+    })),
+  });
+
+  const getMyAttempt = (idx: number): SessionAttempt | undefined => {
+    const detail = detailQueries[idx]?.data as Record<string, unknown> | undefined;
+    const sessionAttempts = (detail?.session as Record<string, unknown> | undefined)
+      ?.attempts as SessionAttempt[] | undefined;
+    const rootAttempts = detail?.attempts as SessionAttempt[] | undefined;
+    const attempts = sessionAttempts ?? rootAttempts;
+    console.log('DEBUG getMyAttempt', { idx, userId: user?.id, sessionAttempts, rootAttempts, found: attempts?.find((a) => a.student_id === user?.id) });
+    return attempts?.find((a) => a.student_id === user?.id);
+  };
+
+  const getActualStatus = (session: ExamSession, idx: number): string | null | undefined => {
+    return getMyAttempt(idx)?.status ?? session.my_attempt_status;
+  };
+
+  const isActuallyDone = (session: ExamSession, idx: number): boolean => {
+    const status = getActualStatus(session, idx);
+    return status === 'submitted' || status === 'timed_out';
+  };
+
+  const submittedSessions = sessions.filter((s, i) => isActuallyDone(s, i));
+  const totalActive = sessions.filter((s, i) => !isActuallyDone(s, i)).length;
 
   return (
     <div className="sep-page container">
@@ -139,7 +129,7 @@ const StudentExamsPage = () => {
         </div>
       </div>
 
-      {/* Active Tests — all sessions, button differs by status */}
+      {/* Active Tests */}
       <div className="sep-section">
         <div className="sep-section-title">
           <span className="sep-info-icon">i</span>
@@ -152,45 +142,51 @@ const StudentExamsPage = () => {
               <th>{t('student.exams.colGroup')}</th>
               <th>{t('student.exams.colQuestions')}</th>
               <th>{t('student.exams.colTimeLimit')}</th>
+              <th>{t('student.exams.colPassPct')}</th>
               <th>{t('student.exams.colDateTime')}</th>
               <th>{t('student.exams.colActions')}</th>
             </tr>
           </thead>
           <tbody>
             {sessions.length > 0 ? (
-              sessions.map((s) => (
-                <tr key={s.id}>
-                  <td>{s.test?.name || '-'}</td>
-                  <td>{s.group?.name || '-'}</td>
-                  <td>{s.test?.questions_count ?? '-'} {t('student.exams.questions')}</td>
-                  <td>{s.test?.time_limit ?? '-'} {t('student.exams.minutes')}</td>
-                  <td>{formatDateTime(s.exam_date, s.start_time)}</td>
-                  <td>
-                    {isDone(s) ? (
-                      <button className="sep-btn sep-btn-done" disabled>
-                        {t('student.exams.submitted')}
-                      </button>
-                    ) : s.my_attempt_status === 'in_progress' ? (
-                      <button
-                        className="sep-btn sep-btn-continue"
-                        onClick={() => navigate(`/student-exam/${s.id}`)}
-                      >
-                        {t('student.exams.continueTest')}
-                      </button>
-                    ) : (
-                      <button
-                        className="sep-btn sep-btn-active"
-                        onClick={() => navigate(`/student-exam/${s.id}`)}
-                      >
-                        {t('student.exams.startTest')}
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))
+              sessions.map((s, idx) => {
+                const actualStatus = getActualStatus(s, idx);
+                const done = isActuallyDone(s, idx);
+                return (
+                  <tr key={s.id}>
+                    <td>{s.test?.name || '-'}</td>
+                    <td>{s.group?.name || '-'}</td>
+                    <td>{s.test?.questions_count ?? '-'} {t('student.exams.questions')}</td>
+                    <td>{s.test?.time_limit ?? '-'} {t('student.exams.minutes')}</td>
+                    <td>{s.test?.pass_percentage != null ? `${s.test.pass_percentage}%` : '—'}</td>
+                    <td>{formatDateTime(s.exam_date, s.start_time)}</td>
+                    <td>
+                      {done ? (
+                        <button className="sep-btn sep-btn-done" disabled>
+                          {t('student.exams.submitted')}
+                        </button>
+                      ) : actualStatus === 'in_progress' ? (
+                        <button
+                          className="sep-btn sep-btn-continue"
+                          onClick={() => navigate(`/student-exam/${s.id}`)}
+                        >
+                          {t('student.exams.continueTest')}
+                        </button>
+                      ) : (
+                        <button
+                          className="sep-btn sep-btn-active"
+                          onClick={() => navigate(`/student-exam/${s.id}`)}
+                        >
+                          {t('student.exams.startTest')}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
-                <td colSpan={6} className="sep-empty">
+                <td colSpan={7} className="sep-empty">
                   {t('student.exams.noTests')}
                 </td>
               </tr>
@@ -199,7 +195,7 @@ const StudentExamsPage = () => {
         </table>
       </div>
 
-      {/* Submitted results — each row fetches its own session detail */}
+      {/* Submitted results */}
       <div className="sep-section">
         <div className="sep-section-title">
           <span className="sep-info-icon">i</span>
@@ -210,19 +206,51 @@ const StudentExamsPage = () => {
             <tr>
               <th>{t('student.exams.colTestName')}</th>
               <th>{t('student.exams.colGroup')}</th>
+              <th>{t('student.exams.colPassPct')}</th>
               <th>{t('student.exams.colPercent')}</th>
               <th>{t('student.exams.colCorrect')}</th>
+              <th>{t('student.exams.colIncorrect')}</th>
               <th>{t('student.exams.colResult')}</th>
             </tr>
           </thead>
           <tbody>
             {submittedSessions.length > 0 ? (
-              submittedSessions.map((s) => (
-                <SubmittedSessionRow key={s.id} session={s} />
-              ))
+              submittedSessions.map((s) => {
+                const idx = sessions.indexOf(s);
+                const myAttempt = getMyAttempt(idx);
+                const pct =
+                  myAttempt?.percentage != null
+                    ? Number(myAttempt.percentage).toFixed(1)
+                    : null;
+                const total = myAttempt?.total_questions ?? s.test?.questions_count ?? null;
+                const incorrect = myAttempt?.incorrect_count ?? null;
+                const correct = total != null && incorrect != null ? total - incorrect : null;
+                const passed = myAttempt?.is_passed;
+                return (
+                  <tr key={s.id}>
+                    <td>{s.test?.name || '-'}</td>
+                    <td>{s.group?.name || '-'}</td>
+                    <td>{s.test?.pass_percentage != null ? `${s.test.pass_percentage}%` : '—'}</td>
+                    <td>{pct != null ? `${pct}%` : '—'}</td>
+                    <td>{correct != null ? correct : '—'}</td>
+                    <td>{incorrect != null ? incorrect : '—'}</td>
+                    <td>
+                      {passed != null ? (
+                        <span className={`sep-badge ${passed ? 'sep-badge-pass' : 'sep-badge-fail'}`}>
+                          {passed ? t('student.exams.passed') : t('student.exams.failed')}
+                        </span>
+                      ) : (
+                        <span className="sep-badge sep-badge-submitted">
+                          {t('student.exams.submittedBadge')}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
-                <td colSpan={5} className="sep-empty">
+                <td colSpan={7} className="sep-empty">
                   {t('student.exams.noSubmitted')}
                 </td>
               </tr>
