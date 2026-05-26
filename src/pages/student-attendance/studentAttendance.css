@@ -10,7 +10,8 @@
 
 .sa-page {
   width: 100%;
-  margin-top: 50px;
+  margin-top: 50px !important;
+  margin-left: 140px !important;
 }
 
 /* ===== HEADER ===== */
@@ -74,7 +75,7 @@
 .month-pill {
   padding: 5px 12px;
   border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   background: transparent;
   color: white;
   cursor: pointer;
@@ -84,7 +85,9 @@
   white-space: nowrap;
 }
 
-.month-pill:hover { background: rgba(255,255,255,0.2); }
+.month-pill:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
 
 .month-pill.active {
   background: white;
@@ -117,11 +120,21 @@
   flex-shrink: 0;
 }
 
-.dot-present { background: var(--present-color); }
-.dot-absent  { background: var(--absent-color); }
-.dot-late    { background: var(--late-color); }
-.dot-reason  { background: var(--reason-color); }
-.dot-empty   { background: #d0d0d0; }
+.dot-present {
+  background: var(--present-color);
+}
+.dot-absent {
+  background: var(--absent-color);
+}
+.dot-late {
+  background: var(--late-color);
+}
+.dot-reason {
+  background: var(--reason-color);
+}
+.dot-empty {
+  background: #d0d0d0;
+}
 
 /* ===== GROUP BAR ===== */
 .sa-group-bar {
@@ -209,11 +222,21 @@
   text-transform: uppercase;
 }
 
-.sa-stat-present .sa-stat-num { color: var(--present-color); }
-.sa-stat-absent  .sa-stat-num { color: var(--absent-color); }
-.sa-stat-late    .sa-stat-num { color: var(--late-color); }
-.sa-stat-reason  .sa-stat-num { color: var(--reason-color); }
-.sa-stat-score   .sa-stat-num { color: var(--primary-color); }
+.sa-stat-present .sa-stat-num {
+  color: var(--present-color);
+}
+.sa-stat-absent .sa-stat-num {
+  color: var(--absent-color);
+}
+.sa-stat-late .sa-stat-num {
+  color: var(--late-color);
+}
+.sa-stat-reason .sa-stat-num {
+  color: var(--reason-color);
+}
+.sa-stat-score .sa-stat-num {
+  color: var(--primary-color);
+}
 
 /* ===== DESKTOP TABLE ===== */
 .desktop-table-container {
@@ -231,11 +254,19 @@
   display: table;
 }
 
-.attendance-table thead { display: table-header-group; }
-.attendance-table tbody { display: table-row-group; }
+.attendance-table thead {
+  display: table-header-group;
+}
+.attendance-table tbody {
+  display: table-row-group;
+}
 .attendance-table thead tr,
-.attendance-table tbody tr { display: table-row; }
-.attendance-table thead tr { background: #fff; }
+.attendance-table tbody tr {
+  display: table-row;
+}
+.attendance-table thead tr {
+  background: #fff;
+}
 
 .student-col-header {
   display: table-cell;
@@ -299,7 +330,17 @@
   gap: 10px;
 }
 
-.student-text { display: flex; flex-direction: column; }
+.student-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.student-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
 .student-name {
   font-weight: 600;
@@ -312,6 +353,19 @@
   font-size: 12px;
   color: #666;
 }
+
+/* Aktiv / Noaktiv badge */
+.sa-status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.sa-badge-aktiv   { background: #228be6; color: #fff; }
+.sa-badge-noaktiv { background: #adb5bd; color: #fff; }
 
 .attendance-cell {
   display: table-cell;
@@ -335,9 +389,14 @@
   flex-shrink: 0;
 }
 
-.attendance-dot.dot-late { color: #000; }
+.attendance-dot.dot-late {
+  color: #000;
+}
 
-.grade-value { font-weight: 700; font-size: 13px; }
+.grade-value {
+  font-weight: 700;
+  font-size: 13px;
+}
 
 /* ===== EMPTY STATE ===== */
 .sa-empty-state {
@@ -351,68 +410,377 @@
   font-size: 15px;
 }
 
-.sa-empty-icon { font-size: 40px; margin-bottom: 12px; }
-
-/* ===== MOBILE LIST ===== */
-.sa-mobile-list { display: none; flex-direction: column; gap: 10px; padding: 12px; }
-
-.sa-day-card {
-  background: white;
-  border-radius: 12px;
-  border: 1.5px solid var(--border-color);
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  box-shadow: var(--card-shadow);
+.sa-empty-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
 }
 
-.sa-day-present { border-left: 4px solid var(--present-color); }
-.sa-day-absent  { border-left: 4px solid var(--absent-color); }
-.sa-day-late    { border-left: 4px solid var(--late-color); }
-.sa-day-reason  { border-left: 4px solid var(--reason-color); }
-
-.sa-day-date {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 36px;
+/* ===== BALANCE COLUMN (desktop) ===== */
+.sa-balance-header {
+  display: table-cell;
+  padding: 8px 14px;
+  text-align: right;
+  border-bottom: 2px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+  white-space: nowrap;
+  font-size: 11px;
+  font-family: noto-b, sans-serif;
+  color: #999;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  vertical-align: middle;
+  min-width: 130px;
 }
 
-.sa-day-num { font-size: 20px; font-weight: 700; color: #1a202c; }
-.sa-day-wd  { font-size: 11px; color: #888; font-weight: 600; text-transform: uppercase; }
-
-.sa-day-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
+.sa-balance-cell {
+  display: table-cell;
+  padding: 10px 14px;
+  text-align: right;
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
-.sa-day-status { font-size: 14px; font-weight: 600; color: #333; }
-.sa-day-score  { font-size: 13px; font-weight: 700; color: var(--primary-color); margin-left: auto; }
-.sa-day-comment { font-size: 12px; color: #666; margin-top: 4px; }
+.sa-balance-id {
+  font-size: 12px;
+  font-weight: 700;
+  color: #003366;
+}
+
+.sa-balance-date {
+  font-size: 11px;
+  color: #888;
+  margin: 2px 0;
+}
+
+.sa-balance-val {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sa-balance-pos { color: var(--present-color); }
+.sa-balance-neg { color: var(--absent-color); }
+
+/* ===== MOBILE ELEMENTS (hidden on desktop) ===== */
+.sa-mobile-header {
+  display: none;
+}
+.sa-mobile-card {
+  display: none;
+}
+
+/* ===== OLD MOBILE LIST (hidden always — replaced by sa-mobile-card) ===== */
+.sa-mobile-list {
+  display: none !important;
+}
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .sa-page { margin-top: 0; }
-
-  .sa-header {
-    border-radius: 0;
-    padding: 14px 16px;
+  .sa-page {
+    margin-top: 20px !important;
+    margin-left: 0 !important;
+    display: flex;
     flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Hide desktop elements */
+  .sa-header {
+    display: none;
+  }
+  .sa-stats {
+    display: none;
+  }
+  .desktop-table-container {
+    display: none;
+  }
+
+  /* ── Mobile month navigation ── */
+  .sa-mobile-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sa-mobile-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border-radius: 14px;
+    padding: 12px 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .sa-nav-arrow {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .sa-nav-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a202c;
+    letter-spacing: 0.5px;
+  }
+
+  .sa-mobile-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    padding: 10px 14px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .sa-mobile-legend .legend-item {
+    color: #444;
+    font-size: 12px;
+    font-weight: 600;
+    gap: 4px;
+  }
+
+  .sa-mobile-legend .legend-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  /* ── Group bar compact ── */
+  .sa-group-bar {
+    padding: 10px 12px;
+    gap: 8px;
+    border-left: none;
+    border-right: none;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .sa-group-label {
+    font-size: 13px;
+  }
+  .sa-group-pills {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .sa-group-pill {
+    padding: 5px 12px;
+    font-size: 12px;
+    border-radius: 16px;
+  }
+
+  /* Empty state tweaks */
+  .sa-empty-state {
+    border: none;
+    border-radius: 12px;
+    padding: 40px 16px;
+    font-size: 13px;
+  }
+
+  /* ── Mobile card ── */
+  .sa-mobile-card {
+    display: block;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Orange student section */
+  .sa-mobile-student {
+    background: var(--primary-color);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
     gap: 12px;
   }
 
-  .sa-controls { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .sa-mobile-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
 
-  .desktop-table-container { display: none; }
+  .sa-mobile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
-  .sa-empty-state { border-radius: 0 0 12px 12px; }
+  .sa-mobile-avatar svg {
+    width: 32px;
+    height: 32px;
+  }
 
-  .sa-mobile-list { display: flex; }
+  .sa-mobile-sinfo {
+    flex: 1;
+    min-width: 0;
+  }
 
-  .sa-stats { padding: 12px 16px; }
+  .sa-mobile-sname {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-  .sa-stat { padding: 8px 14px; min-width: 64px; }
+  .sa-mobile-sphone {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.85);
+    margin-top: 2px;
+  }
+
+  .sa-mobile-sbadge {
+    background: #228be6;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  /* Horizontal attendance grid */
+  .sa-mobile-grid {
+    background: #fff;
+    display: flex;
+    overflow-x: auto;
+    padding: 14px 12px;
+    gap: 6px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sa-mobile-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sa-grid-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    min-width: 38px;
+    flex-shrink: 0;
+  }
+
+  .sa-grid-wd {
+    font-size: 10px;
+    font-weight: 700;
+    color: #003366;
+    text-transform: uppercase;
+  }
+
+  .sa-grid-day {
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+  }
+
+  .sa-mobile-grid .attendance-dot {
+    width: 30px;
+    height: 30px;
+    font-size: 11px;
+  }
+
+  .sa-mobile-empty {
+    padding: 20px;
+    color: #aaa;
+    font-size: 13px;
+    text-align: center;
+    width: 100%;
+  }
+
+  /* Mobile balance footer */
+  .sa-mobile-balance {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fafafa;
+    border-top: 1px solid #f0f0f0;
+    padding: 10px 14px;
+    gap: 8px;
+  }
+
+  .sa-mobile-balance-id {
+    font-size: 11px;
+    color: #999;
+    font-weight: 600;
+  }
+
+  .sa-mobile-balance-val {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+}
+
+@media (max-width: 480px) {
+  .sa-mobile-nav {
+    padding: 10px 12px;
+  }
+  .sa-nav-arrow {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+  .sa-nav-title {
+    font-size: 14px;
+  }
+
+  .sa-mobile-student {
+    padding: 12px 12px;
+    gap: 10px;
+  }
+  .sa-mobile-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  .sa-mobile-sname {
+    font-size: 12px;
+  }
+
+  .sa-mobile-grid {
+    padding: 10px 8px;
+    gap: 4px;
+  }
+  .sa-grid-col {
+    min-width: 34px;
+  }
+  .sa-mobile-grid .attendance-dot {
+    width: 26px;
+    height: 26px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .sa-nav-title { font-size: 13px; }
+  .sa-mobile-legend .legend-item { font-size: 11px; }
+  .sa-grid-col { min-width: 30px; }
+  .sa-mobile-grid .attendance-dot { width: 24px; height: 24px; }
 }

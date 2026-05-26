@@ -20,8 +20,11 @@ type Role = {
 
 type MeResponse = {
   id: number;
-  full_name: string;
-  roles: Role[];
+  full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  image_url?: string | null;
+  role?: Role;
 };
 
 const Header = () => {
@@ -63,23 +66,20 @@ const Header = () => {
     queryKey: ['me'],
     queryFn: async (): Promise<MeResponse> => {
       const { data } = await API.get('/me');
-      return data;
+      return data?.student ?? data;
     },
   });
 
   useEffect(() => {
     if (data) {
-      if (data.roles) {
-        const perms = data.roles
-          .flatMap((role: Role) => role.permissions || [])
-          .map((p: Permission) => p.name);
-        setPermissions(perms);
-      }
-      setUser({ id: data.id, name: data.full_name, role: data.roles?.[0]?.name ?? '' });
+      const rolePerms = data.role?.permissions?.map((p: Permission) => p.name) ?? [];
+      if (rolePerms.length) setPermissions(rolePerms);
+      setUser({ id: data.id, name: data.full_name ?? '', role: data.role?.name ?? 'student' });
     }
   }, [data, setPermissions, setUser]);
 
-  const [firstName, lastName] = data?.full_name?.split(' ') ?? [];
+  const firstName = data?.first_name ?? '';
+  const lastName = data?.last_name ?? '';
 
   const title = pageTitles[pathname] ?? t('header.controlPanel');
 
@@ -118,7 +118,7 @@ const Header = () => {
             <h1>
               {firstName} {lastName}
             </h1>
-            <h3>{data?.roles?.[0]?.name}</h3>
+            <h3>{data?.role?.name ?? 'Student'}</h3>
           </div>
           <div className="header-right-admin-card">
             <img src={adminImg} alt="admin avatar" />

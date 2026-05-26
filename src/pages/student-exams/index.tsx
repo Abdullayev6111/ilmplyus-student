@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { API } from '../../api/api';
+import useAuthStore from '../../store/useAuthStore';
 import './studentExamsPortal.css';
 
 interface ExamSessionTest {
@@ -9,15 +11,11 @@ interface ExamSessionTest {
   time_limit: number;
   pass_percentage: number;
   questions_count: number;
-  course_id?: number;
-  level_id?: number;
 }
 
 interface ExamSessionGroup {
   id: number;
   name: string;
-  course_id?: number;
-  level_id?: number;
 }
 
 interface ExamSession {
@@ -28,12 +26,20 @@ interface ExamSession {
   start_time?: string;
   end_time?: string;
   status: string;
-  min_attendance_pct?: number;
-  notes?: string | null;
-  check_debt?: boolean;
   test?: ExamSessionTest;
   group?: ExamSessionGroup;
   my_attempt_status?: string | null;
+}
+
+interface SessionAttempt {
+  id: number;
+  student_id: number;
+  attempt_number: number;
+  status: string;
+  percentage?: number | string | null;
+  correct_count?: number | null;
+  total_questions?: number | null;
+  is_passed?: boolean | null;
 }
 
 const toArray = <T,>(data: unknown): T[] => {
@@ -53,7 +59,52 @@ const formatDateTime = (date?: string, time?: string) => {
   return time ? `${d} ${time.slice(0, 5)}` : d;
 };
 
+const isDone = (s: ExamSession) =>
+  s.my_attempt_status === 'submitted' || s.my_attempt_status === 'timed_out';
+
+/* Topshirilgan har bir sessiya uchun alohida fetch */
+const SubmittedSessionRow = ({ session }: { session: ExamSession }) => {
+  const { t } = useTranslation();
+  const user = useAuthStore((state) => state.user);
+
+  const { data: detail } = useQuery({
+    queryKey: ['exam-session-detail', session.id],
+    queryFn: () =>
+      API.get(`/exam-sessions/${session.id}`).then((r) => r.data),
+    staleTime: 5 * 60 * 1000,
+    enabled: !!session.id,
+  });
+
+  const attempts: SessionAttempt[] = detail?.attempts ?? [];
+  const myAttempt = attempts.find((a) => a.student_id === user?.id);
+
+  const pct =
+    myAttempt?.percentage != null ? Number(myAttempt.percentage).toFixed(1) : null;
+  const correct = myAttempt?.correct_count;
+  const total = myAttempt?.total_questions ?? session.test?.questions_count;
+  const passed = myAttempt?.is_passed;
+
+  return (
+    <tr>
+      <td>{session.test?.name || '-'}</td>
+      <td>{session.group?.name || '-'}</td>
+      <td>{pct != null ? `${pct}%` : '—'}</td>
+      <td>{correct != null && total != null ? `${total}/${correct}` : '—'}</td>
+      <td>
+        {passed != null ? (
+          <span className={`sep-badge ${passed ? 'sep-badge-pass' : 'sep-badge-fail'}`}>
+            {passed ? t('student.exams.passed') : t('student.exams.failed')}
+          </span>
+        ) : (
+          <span className="sep-badge sep-badge-submitted">{t('student.exams.submittedBadge')}</span>
+        )}
+      </td>
+    </tr>
+  );
+};
+
 const StudentExamsPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const { data: sessionsRaw } = useQuery({
@@ -62,72 +113,85 @@ const StudentExamsPage = () => {
   });
 
   const sessions = toArray<ExamSession>(sessionsRaw);
-
-  const activeSessions = sessions.filter(
-    (s) => s.my_attempt_status !== 'submitted' && s.my_attempt_status !== 'timed_out',
-  );
-  const submittedSessions = sessions.filter(
-    (s) => s.my_attempt_status === 'submitted' || s.my_attempt_status === 'timed_out',
-  );
+  console.log('RAW sessions:', sessionsRaw);
+  const submittedSessions = sessions.filter((s) => isDone(s));
+  const totalActive = sessions.filter((s) => !isDone(s)).length;
 
   return (
     <div className="sep-page container">
       {/* Stats */}
       <div className="sep-stats">
         <div className="sep-stat-card">
-          <div className="sep-stat-label">Jami testlar</div>
-          <div className="sep-stat-value">{sessions.length > 0 ? `${sessions.length}ta` : '—'}</div>
+          <div className="sep-stat-label">{t('student.exams.totalTests')}</div>
+          <div className="sep-stat-value">
+            {sessions.length > 0 ? `${sessions.length}ta` : '—'}
+          </div>
         </div>
         <div className="sep-stat-card">
-          <div className="sep-stat-label">Aktiv testlar</div>
-          <div className="sep-stat-value">{activeSessions.length > 0 ? `${activeSessions.length}ta` : '—'}</div>
+          <div className="sep-stat-label">{t('student.exams.activeTests')}</div>
+          <div className="sep-stat-value">{totalActive > 0 ? `${totalActive}ta` : '—'}</div>
         </div>
         <div className="sep-stat-card">
-          <div className="sep-stat-label">Topshirilgan testlar</div>
-          <div className="sep-stat-value">{submittedSessions.length > 0 ? `${submittedSessions.length}ta` : '—'}</div>
+          <div className="sep-stat-label">{t('student.exams.submittedTests')}</div>
+          <div className="sep-stat-value">
+            {submittedSessions.length > 0 ? `${submittedSessions.length}ta` : '—'}
+          </div>
         </div>
       </div>
 
-      {/* Active Tests */}
+      {/* Active Tests — all sessions, button differs by status */}
       <div className="sep-section">
         <div className="sep-section-title">
           <span className="sep-info-icon">i</span>
-          AKTIV TESTLAR
+          {t('student.exams.activeTitle')}
         </div>
         <table className="sep-table">
           <thead>
             <tr>
-              <th>TEST NOMI</th>
-              <th>GURUH</th>
-              <th>SAVOLLAR</th>
-              <th>VAQT LIMIT</th>
-              <th>SANA VA VAQT</th>
-              <th>AMALLAR</th>
+              <th>{t('student.exams.colTestName')}</th>
+              <th>{t('student.exams.colGroup')}</th>
+              <th>{t('student.exams.colQuestions')}</th>
+              <th>{t('student.exams.colTimeLimit')}</th>
+              <th>{t('student.exams.colDateTime')}</th>
+              <th>{t('student.exams.colActions')}</th>
             </tr>
           </thead>
           <tbody>
-            {activeSessions.length > 0 ? (
-              activeSessions.map((s) => (
+            {sessions.length > 0 ? (
+              sessions.map((s) => (
                 <tr key={s.id}>
                   <td>{s.test?.name || '-'}</td>
                   <td>{s.group?.name || '-'}</td>
-                  <td>{s.test?.questions_count ?? '-'} ta savol</td>
-                  <td>{s.test?.time_limit ?? '-'} min</td>
+                  <td>{s.test?.questions_count ?? '-'} {t('student.exams.questions')}</td>
+                  <td>{s.test?.time_limit ?? '-'} {t('student.exams.minutes')}</td>
                   <td>{formatDateTime(s.exam_date, s.start_time)}</td>
                   <td>
-                    <button
-                      className="sep-btn sep-btn-active"
-                      onClick={() => navigate(`/student-exam/${s.id}`)}
-                    >
-                      Test topshirish
-                    </button>
+                    {isDone(s) ? (
+                      <button className="sep-btn sep-btn-done" disabled>
+                        {t('student.exams.submitted')}
+                      </button>
+                    ) : s.my_attempt_status === 'in_progress' ? (
+                      <button
+                        className="sep-btn sep-btn-continue"
+                        onClick={() => navigate(`/student-exam/${s.id}`)}
+                      >
+                        {t('student.exams.continueTest')}
+                      </button>
+                    ) : (
+                      <button
+                        className="sep-btn sep-btn-active"
+                        onClick={() => navigate(`/student-exam/${s.id}`)}
+                      >
+                        {t('student.exams.startTest')}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
                 <td colSpan={6} className="sep-empty">
-                  Aktiv testlar mavjud emas
+                  {t('student.exams.noTests')}
                 </td>
               </tr>
             )}
@@ -135,39 +199,31 @@ const StudentExamsPage = () => {
         </table>
       </div>
 
-      {/* Submitted Tests */}
+      {/* Submitted results — each row fetches its own session detail */}
       <div className="sep-section">
         <div className="sep-section-title">
           <span className="sep-info-icon">i</span>
-          Topshirilgan testlar
+          {t('student.exams.submittedTitle')}
         </div>
         <table className="sep-table">
           <thead>
             <tr>
-              <th>TEST NOMI</th>
-              <th>GURUH</th>
-              <th>SAVOLLAR</th>
-              <th>SANA VA VAQT</th>
-              <th>HOLAT</th>
+              <th>{t('student.exams.colTestName')}</th>
+              <th>{t('student.exams.colGroup')}</th>
+              <th>{t('student.exams.colPercent')}</th>
+              <th>{t('student.exams.colCorrect')}</th>
+              <th>{t('student.exams.colResult')}</th>
             </tr>
           </thead>
           <tbody>
             {submittedSessions.length > 0 ? (
               submittedSessions.map((s) => (
-                <tr key={s.id}>
-                  <td>{s.test?.name || '-'}</td>
-                  <td>{s.group?.name || '-'}</td>
-                  <td>{s.test?.questions_count ?? '-'} ta savol</td>
-                  <td>{formatDateTime(s.exam_date, s.start_time)}</td>
-                  <td>
-                    <span className="sep-badge sep-badge-pass">Topshirildi</span>
-                  </td>
-                </tr>
+                <SubmittedSessionRow key={s.id} session={s} />
               ))
             ) : (
               <tr>
                 <td colSpan={5} className="sep-empty">
-                  Topshirilgan testlar mavjud emas
+                  {t('student.exams.noSubmitted')}
                 </td>
               </tr>
             )}

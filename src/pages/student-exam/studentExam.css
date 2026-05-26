@@ -454,3 +454,173 @@
   font-weight: 700;
   color: #111827;
 }
+
+.exam-result-back-btn {
+  margin-top: 32px;
+  padding: 12px 32px;
+  border: none;
+  border-radius: 10px;
+  background: #1e3a5c;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.exam-result-back-btn:hover {
+  background: #162d47;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .exam-page {
+    padding: 8px;
+    gap: 8px;
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* Header compact */
+  .exam-header {
+    padding: 10px 14px;
+    border-radius: 10px;
+    gap: 8px;
+  }
+
+  .exam-student-name { font-size: 14px; }
+  .exam-header-info { font-size: 11px; }
+
+  .exam-timer {
+    font-size: 20px;
+    padding: 6px 14px;
+    min-width: 80px;
+    letter-spacing: 1px;
+  }
+
+  /* Stack: question area on top, nav panel below */
+  .exam-body {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  /* Nav panel full width */
+  .exam-nav-panel {
+    width: 100%;
+    border-radius: 10px;
+    flex-direction: row;
+    align-items: stretch;
+    overflow: visible;
+  }
+
+  .exam-nav-header {
+    display: none;
+  }
+
+  .exam-nav-grid {
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+    padding: 10px;
+    flex: 1;
+    align-content: start;
+    overflow-y: visible;
+  }
+
+  .exam-nav-btn {
+    font-size: 11px;
+    border-radius: 5px;
+  }
+
+  .exam-yakunlash-wrap {
+    padding: 10px;
+    min-width: 120px;
+    display: flex;
+    align-items: center;
+  }
+
+  .exam-yakunlash-btn {
+    padding: 9px 0;
+    font-size: 12px;
+    height: 100%;
+    min-height: 42px;
+  }
+
+  /* Question area */
+  .exam-question-area { border-radius: 10px; }
+
+  .exam-question-meta { padding: 10px 14px; font-size: 12px; }
+
+  .exam-question-content { padding: 14px 14px 8px; }
+
+  .exam-question-text { font-size: 14px; margin-bottom: 14px; line-height: 1.5; }
+
+  .exam-options { gap: 8px; }
+
+  .exam-option-btn { padding: 11px 14px; font-size: 13px; }
+
+  .exam-text-input { padding: 11px 14px; font-size: 13px; }
+
+  .exam-question-footer { padding: 10px 14px; }
+
+  .exam-btn-primary,
+  .exam-btn-secondary { padding: 9px 16px; font-size: 13px; }
+
+  /* Modal */
+  .exam-modal { padding: 24px 18px; width: 92vw; }
+  .exam-modal-title { font-size: 16px; }
+  .exam-modal-text { font-size: 13px; margin-bottom: 20px; }
+
+  /* Result card */
+  .exam-result-card {
+    padding: 28px 16px;
+    margin: 16px auto;
+    border-radius: 12px;
+  }
+
+  .exam-result-title { font-size: 20px; margin-bottom: 14px; }
+  .exam-result-badge { font-size: 14px; padding: 6px 24px; margin-bottom: 24px; }
+
+  .exam-result-stats {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .exam-result-stat {
+    min-width: unset;
+    padding: 14px 18px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .exam-result-value { font-size: 20px; }
+
+  .exam-result-back-btn {
+    margin-top: 20px;
+    padding: 10px 24px;
+    font-size: 14px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .exam-nav-grid { grid-template-columns: repeat(6, 1fr); }
+
+  .exam-header-info { display: none; }
+
+  .exam-timer { font-size: 18px; min-width: 70px; padding: 5px 10px; }
+
+  .exam-student-name { font-size: 13px; }
+
+  .exam-btn-primary,
+  .exam-btn-secondary { padding: 8px 12px; font-size: 12px; }
+}
+
+@media (max-width: 360px) {
+  .exam-nav-grid { grid-template-columns: repeat(5, 1fr); }
+
+  .exam-yakunlash-wrap { min-width: 90px; }
+
+  .exam-yakunlash-btn { font-size: 11px; }
+}

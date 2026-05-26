@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { API } from '../../api/api';
 import './studentProfile.css';
 
@@ -39,11 +40,10 @@ interface StudentData {
   photo?: string | null;
   photo_url?: string | null;
   image?: string | null;
+  image_url?: string | null;
   branch?: Branch;
   groups?: Group[];
 }
-
-const TABS = ["Shaxsiy ma'lumotlar", 'Kurslarim', 'Imtihon va testlar'];
 
 const formatDate = (dateStr?: string) => {
   if (!dateStr) return '-';
@@ -79,6 +79,7 @@ const InfoRow = ({
 );
 
 const ProfilePage = () => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState(0);
   const [cameraOpen, setCameraOpen] = useState(false);
@@ -87,6 +88,12 @@ const ProfilePage = () => {
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const TABS = [
+    t('student.profile.personalInfo'),
+    t('student.profile.myCourses'),
+    t('student.profile.examsTests'),
+  ];
+
   const { data: profile } = useQuery<StudentData>({
     queryKey: ['student-profile'],
     queryFn: () => API.get('/me').then((r) => r.data?.student ?? r.data),
@@ -94,7 +101,7 @@ const ProfilePage = () => {
 
   const uploadMutation = useMutation({
     mutationFn: (formData: FormData) =>
-      API.post(`/students/${profile?.id}/image`, formData, {
+      API.post(`/students/${profile?.id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       }).catch(() =>
         API.put(`/students/${profile?.id}`, formData, {
@@ -163,7 +170,7 @@ const ProfilePage = () => {
     e.target.value = '';
   };
 
-  const photoUrl = profile?.photo_url || profile?.photo || profile?.image;
+  const photoUrl = profile?.image_url || profile?.photo_url || profile?.photo || profile?.image;
 
   const fullName =
     profile?.full_name ||
@@ -173,7 +180,7 @@ const ProfilePage = () => {
   return (
     <div className="sp-page container">
       <div className="sp-header-card">
-        <div className="sp-photo-wrap" onClick={openCamera} title="Rasmni o'zgartirish">
+        <div className="sp-photo-wrap" onClick={openCamera} title={t('student.profile.changePhoto')}>
           {photoUrl ? (
             <img src={photoUrl} alt="profile" className="sp-photo-img" />
           ) : (
@@ -190,24 +197,24 @@ const ProfilePage = () => {
         />
 
         <div className="sp-info-area">
-          <div className="sp-info-section-label">Shaxsiy ma'lumotlar</div>
+          <div className="sp-info-section-label">{t('student.profile.personalInfo')}</div>
           <div className="sp-info-grid">
-            <InfoRow label="F.I.SH" value={fullName} blue />
-            <InfoRow label="TALABA KODI" value={profile?.student_code} blue />
-            <InfoRow label="FOYDALANUVCHI NOMI" value={profile?.username} />
-            <InfoRow label="TUG'ILGAN SANASI" value={formatDate(profile?.birth_date)} />
-            <InfoRow label="TELEFON NOMER" value={formatPhone(profile?.phone)} />
-            <InfoRow label="FILIAL" value={profile?.branch?.name_uz} />
+            <InfoRow label={t('student.profile.fish')} value={fullName} blue />
+            <InfoRow label={t('student.profile.studentCode')} value={profile?.student_code} blue />
+            <InfoRow label={t('student.profile.username')} value={profile?.username} />
+            <InfoRow label={t('student.profile.birthDate')} value={formatDate(profile?.birth_date)} />
+            <InfoRow label={t('student.profile.phone')} value={formatPhone(profile?.phone)} />
+            <InfoRow label={t('student.profile.branch')} value={profile?.branch?.name_uz} />
           </div>
 
           <div className="sp-badges">
             <span className="sp-badge-balance">
-              BALANS&nbsp;&nbsp;{formatBalance(profile?.balance)}
+              {t('student.profile.balance')}&nbsp;&nbsp;{formatBalance(profile?.balance)}
             </span>
             <span className="sp-badge-status">
-              STATUS
+              {t('student.profile.status')}
               <span className="sp-badge-status-dot" />
-              {profile?.is_active ? 'Aktiv' : 'Nofaol'}
+              {profile?.is_active ? t('student.profile.active') : t('student.profile.inactive')}
             </span>
           </div>
         </div>
@@ -228,21 +235,21 @@ const ProfilePage = () => {
       <div className="sp-tab-content">
         {activeTab === 0 && (
           <>
-            <div className="sp-tab-section-title">Shaxsiy ma'lumotlar</div>
+            <div className="sp-tab-section-title">{t('student.profile.personalInfo')}</div>
             <div className="sp-tab-info-grid">
-              <InfoRow label="F.I.SH" value={fullName} blue />
-              <InfoRow label="TALABA KODI" value={profile?.student_code} blue />
-              <InfoRow label="FOYDALANUVCHI NOMI" value={profile?.username} />
-              <InfoRow label="JINSI" value={profile?.gender ?? '-'} />
-              <InfoRow label="TUG'ILGAN SANASI" value={formatDate(profile?.birth_date)} />
-              <InfoRow label="PASSPORT SERIYA VA RAQAM" value={profile?.passport_series} />
-              <InfoRow label="PINFL" value={profile?.pinfl} />
-              <InfoRow label="TELEFON NOMER" value={formatPhone(profile?.phone)} />
-              <InfoRow label="FILIAL" value={profile?.branch?.name_uz} />
-              <InfoRow label="SHAHAR" value={profile?.branch?.city} />
+              <InfoRow label={t('student.profile.fish')} value={fullName} blue />
+              <InfoRow label={t('student.profile.studentCode')} value={profile?.student_code} blue />
+              <InfoRow label={t('student.profile.username')} value={profile?.username} />
+              <InfoRow label={t('student.profile.gender')} value={profile?.gender ?? '-'} />
+              <InfoRow label={t('student.profile.birthDate')} value={formatDate(profile?.birth_date)} />
+              <InfoRow label={t('student.profile.passport')} value={profile?.passport_series} />
+              <InfoRow label={t('student.profile.pinfl')} value={profile?.pinfl} />
+              <InfoRow label={t('student.profile.phone')} value={formatPhone(profile?.phone)} />
+              <InfoRow label={t('student.profile.branch')} value={profile?.branch?.name_uz} />
+              <InfoRow label={t('student.profile.city')} value={profile?.branch?.city} />
               <InfoRow
-                label="SHARTNOMA HOLATI"
-                value={profile?.is_contract_confirmed ? 'Tasdiqlangan' : 'Tasdiqlanmagan'}
+                label={t('student.profile.contractStatus')}
+                value={profile?.is_contract_confirmed ? t('student.profile.confirmed') : t('student.profile.notConfirmed')}
               />
             </div>
           </>
@@ -250,16 +257,16 @@ const ProfilePage = () => {
 
         {activeTab === 1 && (
           <>
-            <div className="sp-tab-section-title">Kurslarim</div>
+            <div className="sp-tab-section-title">{t('student.profile.myCourses')}</div>
             {profile?.groups && profile.groups.length > 0 ? (
               <table className="sep-table">
                 <thead>
                   <tr>
-                    <th>GURUH NOMI</th>
-                    <th>BOSHLANISH SANASI</th>
-                    <th>TUGASH SANASI</th>
-                    <th>DARS VAQTI</th>
-                    <th>HOLAT</th>
+                    <th>{t('student.profile.groupName')}</th>
+                    <th>{t('student.profile.startDate')}</th>
+                    <th>{t('student.profile.endDate')}</th>
+                    <th>{t('student.profile.lessonTime')}</th>
+                    <th>{t('student.profile.statusLabel')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -275,7 +282,7 @@ const ProfilePage = () => {
                       </td>
                       <td>
                         <span className={`sep-badge ${g.is_active ? 'sep-badge-pass' : ''}`}>
-                          {g.is_active ? 'Aktiv' : 'Nofaol'}
+                          {g.is_active ? t('student.profile.active') : t('student.profile.inactive')}
                         </span>
                       </td>
                     </tr>
@@ -283,18 +290,18 @@ const ProfilePage = () => {
                 </tbody>
               </table>
             ) : (
-              <div className="sp-tab-empty">Kurslar mavjud emas</div>
+              <div className="sp-tab-empty">{t('student.profile.noCourses')}</div>
             )}
           </>
         )}
 
-        {activeTab === 2 && <div className="sp-tab-empty">Bu bo'lim hali ishlab chiqilmoqda</div>}
+        {activeTab === 2 && <div className="sp-tab-empty">{t('student.profile.inDevelopment')}</div>}
       </div>
 
       {cameraOpen && (
         <div className="sp-camera-overlay" onClick={closeCamera}>
           <div className="sp-camera-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="sp-camera-heading">Rasm olish</div>
+            <div className="sp-camera-heading">{t('student.profile.photoHeading')}</div>
             <video ref={videoRef} className="sp-camera-video" autoPlay playsInline muted />
             <canvas ref={canvasRef} className="sp-hidden" />
             <div className="sp-camera-actions">
@@ -303,10 +310,10 @@ const ProfilePage = () => {
                 onClick={capturePhoto}
                 disabled={uploadMutation.isPending}
               >
-                {uploadMutation.isPending ? 'Yuklanmoqda...' : 'Rasm olish'}
+                {uploadMutation.isPending ? t('student.profile.photoLoading') : t('student.profile.photoCapture')}
               </button>
               <button className="sp-camera-cancel" onClick={closeCamera}>
-                Bekor qilish
+                {t('student.profile.photoCancel')}
               </button>
             </div>
           </div>

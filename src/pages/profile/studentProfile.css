@@ -140,7 +140,7 @@
   display: flex;
   background: #fff;
   border-bottom: 2px solid #e5e5e5;
-  overflow-x: auto;
+  overflow: hidden;
   flex-wrap: nowrap;
 }
 
@@ -275,4 +275,106 @@
 
 canvas.sp-hidden {
   display: none;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .sp-page {
+    margin-top: 16px !important;
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Tablet: horizontal layout, smaller photo */
+  .sp-header-card {
+    padding: 16px 14px;
+    gap: 14px;
+  }
+
+  .sp-photo-wrap {
+    width: 88px;
+    min-width: 88px;
+    height: 104px;
+  }
+
+  .sp-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px 12px;
+  }
+
+  .sp-info-col-full { grid-column: 1 / -1; }
+
+  .sp-info-key { font-size: 9px; }
+  .sp-info-val { font-size: 12px; }
+
+  .sp-tabs-bar {
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sp-tabs-bar::-webkit-scrollbar { display: none; }
+
+  .sp-tab-btn { padding: 12px 14px; font-size: 12px; }
+
+  .sp-tab-content { padding: 14px; }
+
+  .sp-tab-section-title { font-size: 13px; margin-bottom: 12px; }
+
+  .sp-tab-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 14px;
+  }
+
+  .sp-tab-info-full { grid-column: 1 / -1; }
+
+  .sp-tab-content table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 12px;
+  }
+
+  .sp-badges { gap: 8px; margin-top: 6px; }
+  .sp-badge-balance,
+  .sp-badge-status { font-size: 11px; padding: 6px 10px; }
+}
+
+/* Phone: stack photo above info */
+@media (max-width: 480px) {
+  .sp-header-card {
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 12px;
+    gap: 12px;
+  }
+
+  .sp-photo-wrap {
+    width: 90px;
+    min-width: 90px;
+    height: 106px;
+  }
+
+  .sp-info-area { width: 100%; }
+
+  .sp-info-section-label { text-align: center; }
+
+  .sp-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 10px;
+  }
+
+  .sp-tab-info-grid { grid-template-columns: 1fr; gap: 10px; }
+
+  .sp-badges { justify-content: center; }
+
+  .sp-camera-modal { padding: 16px; }
+  .sp-camera-video { max-height: 240px; }
+}
+
+@media (max-width: 360px) {
+  .sp-info-grid { grid-template-columns: 1fr; }
+  .sp-photo-wrap { width: 76px; min-width: 76px; height: 90px; }
 }

@@ -135,6 +135,15 @@
   cursor: default;
 }
 
+.sep-btn-continue {
+  background: #3f88c9;
+  color: #fff;
+}
+
+.sep-btn-continue:hover {
+  opacity: 0.88;
+}
+
 /* Result badges */
 .sep-badge {
   display: inline-block;
@@ -152,4 +161,60 @@
 .sep-badge-fail {
   background: #fff0f0;
   color: #e03131;
+}
+
+.sep-badge-submitted {
+  background: #f0f4ff;
+  color: #4263eb;
+}
+
+@media (max-width: 768px) {
+  .sep-page {
+    margin-top: 16px !important;
+    margin-left: 0 !important;
+    gap: 14px;
+  }
+
+  /* Stats 3 columns on tablet */
+  .sep-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .sep-stat-card { padding: 14px 12px; border-radius: 10px; }
+  .sep-stat-value { font-size: 18px; }
+  .sep-stat-label { font-size: 12px; margin-bottom: 4px; }
+
+  /* Section */
+  .sep-section { border-radius: 10px; }
+  .sep-section-title { padding: 12px 14px; font-size: 13px; }
+
+  /* Tables scroll horizontally */
+  .sep-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .sep-table th { padding: 8px 12px; font-size: 10px; }
+  .sep-table td { padding: 10px 12px; font-size: 12px; }
+
+  .sep-empty { padding: 20px; font-size: 13px; }
+
+  .sep-btn { padding: 6px 12px; font-size: 12px; }
+  .sep-badge { padding: 4px 12px; font-size: 12px; }
+}
+
+@media (max-width: 480px) {
+  .sep-stats { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .sep-stat-card { padding: 10px 8px; }
+  .sep-stat-value { font-size: 16px; }
+  .sep-stat-label { font-size: 10px; }
+}
+
+@media (max-width: 360px) {
+  .sep-stats { gap: 4px; }
+  .sep-stat-value { font-size: 14px; }
 }

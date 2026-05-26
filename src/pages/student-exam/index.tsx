@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { API } from '@/api/api';
 import useAuthStore from '@/store/useAuthStore';
 import type {
@@ -14,15 +15,18 @@ import './studentExam.css';
 
 type PageView = 'loading' | 'error' | 'exam' | 'result';
 
-const DIFFICULTY_LABEL: Record<string, string> = {
-  easy: 'Oson',
-  medium: "O'rtacha",
-  hard: 'Qiyin',
-};
-
 const StudentExamPage = () => {
+  const { t } = useTranslation();
   const { sessionId } = useParams<{ sessionId: string }>();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
+
+  const DIFFICULTY_LABEL: Record<string, string> = {
+    easy: t('student.exam.difficulty.easy'),
+    medium: t('student.exam.difficulty.medium'),
+    hard: t('student.exam.difficulty.hard'),
+  };
 
   const [view, setView] = useState<PageView>('loading');
   const [attemptId, setAttemptId] = useState<number | null>(null);
@@ -54,7 +58,7 @@ const StudentExamPage = () => {
       setRemainingSeconds(data.remaining_seconds);
     },
     onError: () => {
-      setErrorMsg('Testni boshlashda xatolik yuz berdi.');
+      setErrorMsg(t('student.exam.startError'));
       setView('error');
     },
   });
@@ -79,6 +83,40 @@ const StudentExamPage = () => {
       clearTimer();
       setSubmitResult(data);
       setView('result');
+      // Optimistically mark this session as submitted in the cache so the
+      // exams list shows the submitted state immediately on navigation back.
+      queryClient.setQueryData(['student-exam-sessions'], (old: unknown) => {
+        if (!old) return old;
+        const update = (s: Record<string, unknown>) =>
+          s.id === Number(sessionId) ? { ...s, my_attempt_status: 'submitted' } : s;
+        if (Array.isArray(old)) return old.map(update);
+        const obj = old as Record<string, unknown>;
+        if (Array.isArray(obj.data)) {
+          return { ...obj, data: (obj.data as Record<string, unknown>[]).map(update) };
+        }
+        return old;
+      });
+      // Also update the session detail cache used by SubmittedSessionRow
+      queryClient.setQueryData(['exam-session-detail', Number(sessionId)], (old: unknown) => {
+        if (!old) return old;
+        const obj = old as Record<string, unknown>;
+        const attempts = Array.isArray(obj.attempts) ? obj.attempts as Record<string, unknown>[] : [];
+        const updatedAttempts = attempts.map((a) =>
+          a.student_id === user?.id
+            ? {
+                ...a,
+                status: 'submitted',
+                percentage: data.percentage,
+                correct_count: data.correct_count,
+                total_questions: data.total_questions,
+                is_passed: data.is_passed,
+              }
+            : a,
+        );
+        return { ...obj, attempts: updatedAttempts };
+      });
+      queryClient.invalidateQueries({ queryKey: ['student-exam-sessions'] });
+      queryClient.invalidateQueries({ queryKey: ['exam-session-detail', Number(sessionId)] });
     },
   });
 
@@ -115,7 +153,7 @@ const StudentExamPage = () => {
           ? 'exam'
           : 'loading';
 
-  const displayErrorMsg = isAttemptDone ? 'Bu test allaqachon yakunlangan.' : errorMsg;
+  const displayErrorMsg = isAttemptDone ? t('student.exam.alreadyDone') : errorMsg;
 
   useEffect(() => {
     if (resolvedView !== 'exam') return;
@@ -202,7 +240,7 @@ const StudentExamPage = () => {
       <div className="exam-page container">
         <div className="exam-loading">
           <div className="exam-spinner" />
-          <span>Yuklanmoqda...</span>
+          <span>{t('student.exam.loading')}</span>
         </div>
       </div>
     );
@@ -223,29 +261,35 @@ const StudentExamPage = () => {
       <div className="exam-page container">
         <div className="exam-result-card">
           <h2 className="exam-result-title">
-            {submitResult.is_passed ? 'Tabriklaymiz!' : 'Afsuski...'}
+            {submitResult.is_passed ? t('student.exam.congrats') : t('student.exam.sorry')}
           </h2>
           <div className={`exam-result-badge ${submitResult.is_passed ? 'passed' : 'failed'}`}>
             {submitResult.status_text}
           </div>
           <div className="exam-result-stats">
             <div className="exam-result-stat">
-              <span className="exam-result-label">Natija</span>
+              <span className="exam-result-label">{t('student.exam.resultScore')}</span>
               <span className="exam-result-value">
                 {Number(submitResult.percentage).toFixed(1)}%
               </span>
             </div>
             <div className="exam-result-stat">
-              <span className="exam-result-label">To'g'ri javoblar</span>
+              <span className="exam-result-label">{t('student.exam.resultCorrect')}</span>
               <span className="exam-result-value">
                 {submitResult.correct_count}/{submitResult.total_questions}
               </span>
             </div>
             <div className="exam-result-stat">
-              <span className="exam-result-label">O'tish chegarasi</span>
+              <span className="exam-result-label">{t('student.exam.resultPassLimit')}</span>
               <span className="exam-result-value">{submitResult.pass_percentage}%</span>
             </div>
           </div>
+          <button
+            className="exam-result-back-btn"
+            onClick={() => navigate('/student-exams')}
+          >
+            {t('student.exam.backToList')}
+          </button>
         </div>
       </div>
     );
@@ -262,7 +306,7 @@ const StudentExamPage = () => {
         <div className="exam-header-left">
           <span className="exam-student-name">{attemptData!.attempt.student_name}</span>
           <span className="exam-header-info">
-            TEST: {attemptData!.attempt.course}&nbsp;&nbsp;&nbsp;Guruh:{' '}
+            {t('student.exam.testPrefix')} {attemptData!.attempt.course}&nbsp;&nbsp;&nbsp;{t('student.exam.groupPrefix')}{' '}
             {attemptData!.attempt.group_name}
           </span>
         </div>
@@ -273,7 +317,7 @@ const StudentExamPage = () => {
 
       <div className="exam-body">
         <div className="exam-nav-panel">
-          <div className="exam-nav-header">Savollar</div>
+          <div className="exam-nav-header">{t('student.exam.navTitle')}</div>
           <div className="exam-nav-grid">
             {questions.map((q, idx) => (
               <button
@@ -297,14 +341,14 @@ const StudentExamPage = () => {
               onClick={() => setShowConfirm(true)}
               disabled={submitMutation.isPending}
             >
-              Yakunlash
+              {t('student.exam.finish')}
             </button>
           </div>
         </div>
 
         <div className="exam-question-area">
           <div className="exam-question-meta">
-            {currentQuestion.order} - Savol
+            {currentQuestion.order} {t('student.exam.questionMeta')}
             {currentQuestion.difficulty_level
               ? ` | ${
                   DIFFICULTY_LABEL[currentQuestion.difficulty_level] ??
@@ -321,7 +365,7 @@ const StudentExamPage = () => {
                 <input
                   className="exam-text-input"
                   type="text"
-                  placeholder="Javobingizni yozing..."
+                  placeholder={t('student.exam.answerPlaceholder')}
                   value={currentAnswer?.text_answer ?? ''}
                   onChange={(e) => handleTextChange(currentQuestion.question_id, e.target.value)}
                   onBlur={(e) => handleTextBlur(currentQuestion.question_id, e.target.value)}
@@ -358,14 +402,14 @@ const StudentExamPage = () => {
               disabled={currentIndex === 0}
               onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
             >
-              Orqaga
+              {t('student.exam.prev')}
             </button>
             <button
               className="exam-btn-primary"
               disabled={currentIndex === questions.length - 1}
               onClick={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))}
             >
-              Keyingi
+              {t('student.exam.next')}
             </button>
           </div>
         </div>
@@ -374,20 +418,20 @@ const StudentExamPage = () => {
       {showConfirm && (
         <div className="exam-modal-overlay" onClick={() => setShowConfirm(false)}>
           <div className="exam-modal" onClick={(e) => e.stopPropagation()}>
-            <h3 className="exam-modal-title">Testni yakunlashni xohlaysizmi?</h3>
+            <h3 className="exam-modal-title">{t('student.exam.confirmTitle')}</h3>
             <p className="exam-modal-text">
-              Javob berilmagan savollar: <strong>{unansweredCount}</strong> ta
+              {t('student.exam.unanswered')} <strong>{unansweredCount}</strong> ta
             </p>
             <div className="exam-modal-actions">
               <button className="exam-btn-secondary" onClick={() => setShowConfirm(false)}>
-                Bekor qilish
+                {t('student.exam.confirmCancel')}
               </button>
               <button
                 className="exam-btn-primary"
                 onClick={handleSubmitConfirm}
                 disabled={submitMutation.isPending}
               >
-                {submitMutation.isPending ? 'Yuborilmoqda...' : 'Ha, yakunlash'}
+                {submitMutation.isPending ? t('student.exam.submitting') : t('student.exam.confirmFinish')}
               </button>
             </div>
           </div>
