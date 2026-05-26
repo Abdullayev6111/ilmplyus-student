@@ -70,4 +70,5 @@ function logoutAndRedirect() {
   logout();
 
   queryClient?.clear();
+  window.location.href = '/login';
 }

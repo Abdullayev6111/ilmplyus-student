@@ -56,7 +56,10 @@ const Header = () => {
 
   const pageTitles: Record<string, string> = {
     '/': t('header.controlPanel'),
-    '/test': t('header.test'),
+    '/student-exams': t('header.test'),
+    '/student-courses': t('header.courses'),
+    '/student-attendance': t('header.attendance'),
+    '/profile': t('header.profile'),
   };
 
   const setPermissions = useAuthStore((state) => state.setPermissions);
@@ -66,8 +69,12 @@ const Header = () => {
     queryKey: ['me'],
     queryFn: async (): Promise<MeResponse> => {
       const { data } = await API.get('/me');
-      return data?.student ?? data;
+      const result = data?.student ?? data;
+      if (!result || !result.id) return null as unknown as MeResponse;
+      return result;
     },
+    retry: 2,
+    staleTime: 5 * 60 * 1000,
   });
 
   useEffect(() => {

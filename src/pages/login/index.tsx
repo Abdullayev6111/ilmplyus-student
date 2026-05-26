@@ -9,7 +9,7 @@ import ptr2 from '../../assets/images/ptr2.png';
 import ptc1 from '../../assets/images/ptc1.png';
 import ptc2 from '../../assets/images/ptc2.png';
 import phoneLogo from '../../assets/images/phone-logo.png';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import LanguageSelect from '../../components/LanguageSelect/LanguageSelect';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { Modal, Button, Text, TextInput, Group, Stack, Paper, PasswordInput } from '@mantine/core';
@@ -66,6 +66,9 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
+  const [isNotStudentError, setIsNotStudentError] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -97,7 +100,12 @@ const LoginPage = () => {
       return data;
     },
     onSuccess: (data) => {
-      setToken(data.token, 30);
+      if (!data.student) {
+        setIsNotStudentError(true);
+        return;
+      }
+      setIsNotStudentError(false);
+      setToken(data.token, 6 * 60);
       setUser({
         id: data.student.id,
         name: `${data.student.first_name} ${data.student.last_name}`,
@@ -108,9 +116,10 @@ const LoginPage = () => {
         data.permissions ??
         [];
       setPermissions(perms);
-      window.location.href = '/student-exams';
+      navigate('/student-exams');
     },
     onError: (error) => {
+      setIsNotStudentError(false);
       console.error(error);
     },
   });
@@ -270,7 +279,10 @@ const LoginPage = () => {
               {t('login.resetPassword')}
             </Link>
 
-            {loginMutation.isError && (
+            {isNotStudentError && (
+              <span className="login-error">Bu tizim faqat o'quvchilar uchun. Iltimos, o'quvchi hisobingiz bilan kiring.</span>
+            )}
+            {loginMutation.isError && !isNotStudentError && (
               <span className="login-error">Login yoki parol noto'g'ri</span>
             )}
 
